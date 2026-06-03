@@ -38,5 +38,11 @@ module ActivityTracker
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    config.log_tags = [ :request_id ]
+    config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
+    config.logger = SemanticLogger["Rails"]
+
+    SemanticLogger.add_appender(io: $stdout, formatter: :color)
   end
 end
