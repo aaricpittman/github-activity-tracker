@@ -1,0 +1,40 @@
+services:
+  app:
+    build: .
+    depends_on:
+      - db
+    environment:
+      ACTIVITY_TRACKER_BASE_URL: http://app:3000/
+      DB_USER: activity_tracker
+      DB_PASSWORD: password
+      SECRET_KEY_BASE: abc123
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/rails
+
+  test:
+    build: .
+    command: bundle exec rspec
+    depends_on:
+      - db
+    environment:
+      DB_USER: activity_tracker
+      DB_PASSWORD: password
+      RAILS_ENV: test
+      SECRET_KEY_BASE: abc123
+    volumes:
+      - .:/rails
+
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: activity_tracker
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/18/docker
+
+volumes:
+  db_data:

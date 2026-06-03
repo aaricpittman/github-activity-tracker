@@ -18,6 +18,9 @@ require "action_cable/engine"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+require_relative "../lib/github"
+require_relative "../lib/activity_tracker"
+
 module ActivityTracker
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
@@ -42,7 +45,5 @@ module ActivityTracker
     config.log_tags = [ :request_id ]
     config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
     config.logger = SemanticLogger["Rails"]
-
-    SemanticLogger.add_appender(io: $stdout, formatter: :color)
   end
 end
