@@ -10,9 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_03_165902) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_03_215614) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "push_events", force: :cascade do |t|
+    t.string "before", null: false
+    t.datetime "created_at", null: false
+    t.string "head", null: false
+    t.json "payload", null: false
+    t.string "provider_id", null: false
+    t.bigint "push_id", null: false
+    t.string "ref", null: false
+    t.bigint "repository_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["provider_id"], name: "index_push_events_on_provider_id", unique: true
+  end
 
   create_table "webhooks_github_events", force: :cascade do |t|
     t.datetime "created_at", null: false

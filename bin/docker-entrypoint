@@ -1,7 +1,18 @@
 #!/bin/bash -e
 
+# Set database variables (defaults to Postgres, change ports/tools for MySQL)
+DB_HOST="${DB_HOST:-db}"
+DB_PORT="${DB_PORT:-5432}"
+
+# Wait for the database to be ready
+echo "Waiting for database connection..."
+until nc -z -v -w30 "$DB_HOST" "$DB_PORT"; do
+  echo "Database is unavailable - sleeping"
+  sleep 1
+done
+
 # If running the rails server then create or migrate existing database
-if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
+if [[ "${@: -2:1}" == "./bin/rails" ]] && [[ "${@: -1:1}" == "server" ]]; then
   ./bin/rails db:prepare
 fi
 

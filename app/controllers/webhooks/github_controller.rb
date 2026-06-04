@@ -7,7 +7,7 @@ class Webhooks::GithubController < ApplicationController
 
   def create
     record = Webhooks::GithubEvent.create!(github_event_id: event_params[:id], payload: event_params)
-    # queue processing job
+    Webhooks::ProcessGithubEventJob.perform_later(record.id)
 
     head :ok
   rescue ActiveRecord::RecordInvalid => e

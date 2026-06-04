@@ -9,7 +9,20 @@ services:
       DB_PASSWORD: password
       SECRET_KEY_BASE: abc123
     ports:
-      - "3000:3000"
+      - "3000:80"
+    volumes:
+      - .:/rails
+
+  worker:
+    build: .
+    command: bin/jobs start
+    depends_on:
+      - db
+    entrypoint: /rails/bin/docker-entrypoint
+    environment:
+      DB_USER: activity_tracker
+      DB_PASSWORD: password
+      SECRET_KEY_BASE: abc123
     volumes:
       - .:/rails
 
