@@ -12,17 +12,18 @@ module ActivityTracker
     end
 
     def run
-      logger.info "starting"
+      logger.info "ingest.github_events.starting"
 
       loop do
         github.fetch_events.each do |event|
+          logger.info "ingest.github_events.sending_event", github_event_id: event.id
           activity_tracker.send_github_event(event)
         end
       end
 
-      logger.info "stopping"
-    rescue Octokit::TooManyRequests
-      logger.info "stopping"
+      logger.info "ingest.github_events.stopping"
+    rescue Github::RateLimited
+      logger.info "ingest.github_events.rate_limited", **github.rate_limit
     end
 
     private

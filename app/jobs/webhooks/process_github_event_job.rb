@@ -1,4 +1,6 @@
 class Webhooks::ProcessGithubEventJob < ApplicationJob
+  include SemanticLogger::Loggable
+
   queue_as :default
 
   retry_on Github::RateLimited, wait: :polynomially_longer, attempts: 5
@@ -10,13 +12,25 @@ class Webhooks::ProcessGithubEventJob < ApplicationJob
   end
 
   def perform(id)
-    return unless (@webhook = Webhooks::GithubEvent.find_by(id: id))
-    return if webhook.processed?
+    unless (@webhook = Webhooks::GithubEvent.find_by(id: id))
+      logger.warn "webhooks.github_events.not_found", webhook_id: id
+      return
+    end
+
+
+    if webhook.processed?
+      logger.warn "webhooks.github_events.already_processed", webhook_id: id, github_event_id: webhook.github_event_id
+      return
+    end
+
+    logger.info "webhooks.github_events.processing", webhook_id: id, github_event_id: webhook.github_event_id
 
     process_actor
     process_repo
     create_push_event
     mark_webhook_as_processed
+
+    logger.info "webhooks.github_events.processed", webhook_id: id, github_event_id: webhook.github_event_id
   end
 
   private
