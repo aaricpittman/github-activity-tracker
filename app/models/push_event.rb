@@ -6,10 +6,17 @@ class PushEvent < ApplicationRecord
   validates :head, presence: true
   validates :before, presence: true
 
-  def self.find_or_create_from_github_event(webhook)
-    create_with(payload: webhook.payload, **webhook.payload["payload"])
-      .find_or_create_by!(provider_id: webhook.github_event_id)
-  rescue
-    find_by(provider_id: webhook.github_event_id)
+  belongs_to :actor
+  belongs_to :repo
+
+  def self.create_or_find_by_github_event(provider_id:, actor_id:, repo_id:, event_payload:)
+    create_or_find_by(provider_id: provider_id) do |push_event|
+      push_event.assign_attributes(
+        actor_id: actor_id,
+        repo_id: repo_id,
+        payload: event_payload,
+        **event_payload["payload"]
+      )
+    end
   end
 end

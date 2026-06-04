@@ -12,7 +12,10 @@ until nc -z -v -w30 "$DB_HOST" "$DB_PORT"; do
 done
 
 # If running the rails server then create or migrate existing database
-if [[ "${@: -2:1}" == "./bin/rails" ]] && [[ "${@: -1:1}" == "server" ]]; then
+cmd="${@: -2:1}"
+subcmd="${@: -1:1}"
+
+if [[ "$cmd" == "./bin/rails" || "$cmd" == "exec" ]] && [[ "$subcmd" == "server" || "$subcmd" == "rspec" ]]; then
   ./bin/rails db:prepare
 fi
 
