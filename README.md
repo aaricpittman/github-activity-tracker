@@ -1,24 +1,30 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Setup
 
-Things you may want to cover:
+```shell
+docker compose run --rm app bin/rails db:prepare
+```
 
-* Ruby version
+## Run System
 
-* System dependencies
+```shell
+docker compose up app worker
+```
 
-* Configuration
+## Run Ingest Process
 
-* Database creation
+```shell
+docker compose run --rm app bin/ingest
+```
 
-* Database initialization
+## Run Test
 
-* How to run the test suite
+```shell
+docker compose run --rm test
+```
 
-* Services (job queues, cache servers, search engines, etc.)
+## Verification
 
-* Deployment instructions
+In addition to logging, there is simple index page that renders the ingested push event for verification [here](http://localhost:3000/).
 
-* ...
