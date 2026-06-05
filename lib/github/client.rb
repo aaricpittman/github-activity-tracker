@@ -10,6 +10,15 @@ module Github
       raise RateLimited, "Github rate limit exceeded"
     end
 
+    def map_event_data_to_push_event_attributes(event_data)
+      {
+        payload: event_data,
+        pushed_at: event_data["created_at"],
+        provider_repository_id: event_data["payload"]["repository_id"],
+        **event_data["payload"].except("repository_id")
+      }
+    end
+
     def refresh_actor_attributes(user)
       data = client.user(user.provider_id)
 

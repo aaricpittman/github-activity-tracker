@@ -4,10 +4,23 @@ RSpec.describe Webhooks::ProcessGithubEventJob, type: :job do
   describe "#perform" do
     let(:github_client) { spy("Github::Client") }
     let(:subject) { Webhooks::ProcessGithubEventJob.new(github_client: github_client) }
+    let(:webhook) { create(:webhooks_github_event) }
+
+    before do
+      allow(github_client).to receive(:map_event_data_to_push_event_attributes)
+        .and_return(
+          {
+            payload: webhook.payload,
+            pushed_at: webhook.payload["created_at"],
+            provider_repository_id: webhook.payload["payload"]["repository_id"],
+            **webhook.payload["payload"].except("repository_id")
+          }
+        )
+    end
 
     describe "webhook record does not exist" do
       it "should do nothing" do
-        expect(PushEvent).to receive(:create_or_find_by_github_event).never
+        expect(PushEvent).to receive(:create_or_find_by).never
 
         subject.perform(0)
       end
@@ -17,7 +30,7 @@ RSpec.describe Webhooks::ProcessGithubEventJob, type: :job do
       let(:webhook) { create(:webhooks_github_event, status: :processed) }
 
       it "should do nothing" do
-        expect(PushEvent).to receive(:create_or_find_by_github_event).never
+        expect(PushEvent).to receive(:create_or_find_by).never
 
         subject.perform(0)
       end

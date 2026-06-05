@@ -38,12 +38,13 @@ class Webhooks::ProcessGithubEventJob < ApplicationJob
   attr_reader :actor, :push_event, :repo, :webhook, :github_client
 
   def create_push_event
-    @push_event = PushEvent.create_or_find_by_github_event(
-      provider_id: webhook.github_event_id,
-      actor_id: actor.id,
-      repo_id: repo.id,
-      event_payload: webhook.payload
-    )
+    @push_event = PushEvent.create_or_find_by(provider_id: webhook.github_event_id) do |push_event|
+      push_event.assign_attributes(
+        actor_id: actor.id,
+        repo_id: repo.id,
+        **github_client.map_event_data_to_push_event_attributes(webhook.payload)
+      )
+    end
   end
 
   def mark_webhook_as_processed

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_05_111352) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_05_192735) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -70,11 +70,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_05_111352) do
     t.string "head", null: false
     t.json "payload", null: false
     t.string "provider_id", null: false
+    t.bigint "provider_repository_id", null: false
     t.bigint "push_id", null: false
     t.datetime "pushed_at"
     t.string "ref", null: false
     t.integer "repo_id"
-    t.bigint "repository_id", null: false
     t.datetime "updated_at", null: false
     t.index ["actor_id"], name: "index_push_events_on_actor_id"
     t.index ["provider_id"], name: "index_push_events_on_provider_id", unique: true
