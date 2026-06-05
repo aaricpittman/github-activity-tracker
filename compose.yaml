@@ -13,6 +13,20 @@ services:
     volumes:
       - .:/rails
 
+  dev_worker:
+    build: .
+    command: bin/jobs start
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_USER: activity_tracker
+      DB_PASSWORD: password
+      RAILS_ENV: development
+      SECRET_KEY_BASE: abc123
+    volumes:
+      - .:/rails
+
   worker:
     build: .
     command: bin/jobs start

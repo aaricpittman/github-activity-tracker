@@ -23,7 +23,7 @@ module ActivityTracker
 
       logger.info "ingest.github_events.stopping"
     rescue Github::RateLimited
-      logger.info "ingest.github_events.rate_limited", **github.rate_limit
+      logger.info "ingest.github_events.rate_limited", **github.rate_limit.to_h
     end
 
     private

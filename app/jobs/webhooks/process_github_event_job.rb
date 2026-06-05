@@ -56,6 +56,10 @@ class Webhooks::ProcessGithubEventJob < ApplicationJob
     if @actor.created_at == @actor.updated_at || @actor.stale?
       @actor = github_client.refresh_actor_attributes(@actor)
       @actor.save
+
+      if @actor.provider_avatar_url_previously_changed?
+        @actor.avatar.attach(io: URI.open(@actor.provider_avatar_url), filename: "#{@actor.login}-avatar.jpg")
+      end
     end
   end
 

@@ -1,0 +1,22 @@
+<li class="flex justify-between gap-x-6 py-5">
+  <div class="flex min-w-0 gap-x-4">
+    <% if push_event.actor.avatar.present? %>
+      <img src="<%= url_for(push_event.actor.avatar) %>" alt="" class="size-12 flex-none rounded-full bg-gray-50 dark:bg-gray-800 dark:outline dark:-outline-offset-1 dark:outline-white/10" />
+    <% end %>
+    <div class="min-w-0 flex-auto">
+      <p class="text-sm/6 font-semibold text-gray-900 dark:text-white">
+        <%= link_to push_event.actor.login, push_event.actor.profile_url, target: :blank %>
+      </p>
+      <% if push_event.actor.email.present? %>
+        <p class="mt-1 truncate text-xs/5 text-gray-500 dark:text-gray-400"><%= push_event.actor.email %></p>
+      <% end %>
+    </div>
+  </div>
+  <div class="hidden shrink-0 sm:flex sm:flex-col sm:items-end">
+    <p class="text-sm/6 text-gray-900 dark:text-white">
+      <%= link_to push_event.repo.name, push_event.repo.url, target: :blank %>
+    </p>
+    <p class="mt-1 text-xs/5 text-gray-500 dark:text-gray-400">Language: <%= push_event.repo.language %></p>
+    <p class="mt-1 text-xs/5 text-gray-500 dark:text-gray-400">Pushed <time datetime="<%= push_event.pushed_at %>"><%= time_ago_in_words(push_event.pushed_at) %> ago</time></p>
+  </div>
+</li>

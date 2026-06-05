@@ -20,6 +20,7 @@ RSpec.describe PushEvent, type: :model do
       expect(result.ref).to eq(webhook.payload["payload"]["ref"])
       expect(result.head).to eq(webhook.payload["payload"]["head"])
       expect(result.before).to eq(webhook.payload["payload"]["before"])
+      expect(result.pushed_at).to eq(webhook.payload["created_at"])
     end
   end
 end

@@ -26,6 +26,7 @@ module Github
         profile_url: data[:html_url],
         provider_created_at: data[:created_at],
         provider_updated_at: data[:updated_at],
+        provider_avatar_url: data[:avatar_url],
         public_repo_count: data[:public_repos],
       )
       user
@@ -60,12 +61,16 @@ module Github
         stargazers_count: data[:stargazers_count],
         subscribers_count: data[:subscribers_count],
         topics: data[:topics],
-        url: data[:url],
+        url: data[:html_url],
         watchers_count: data[:watchers_count]
       )
       repo
     rescue Octokit::TooManyRequests
       raise RateLimited, "Github rate limit exceeded"
+    end
+
+    def rate_limit
+      client.rate_limit
     end
 
     private

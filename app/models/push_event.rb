@@ -15,6 +15,7 @@ class PushEvent < ApplicationRecord
         actor_id: actor_id,
         repo_id: repo_id,
         payload: event_payload,
+        pushed_at: event_payload["created_at"],
         **event_payload["payload"]
       )
     end
