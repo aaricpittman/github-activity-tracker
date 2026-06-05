@@ -46,6 +46,7 @@ services:
     depends_on:
       - db
     environment:
+      DB_HOST: db
       DB_USER: activity_tracker
       DB_PASSWORD: password
       RAILS_ENV: test

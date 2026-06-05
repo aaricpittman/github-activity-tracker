@@ -4,8 +4,8 @@ module Github
       @client = client
     end
 
-    def fetch_events
-      client.public_events
+    def fetch_events(...)
+      client.public_events(...)
     rescue Octokit::TooManyRequests
       raise RateLimited, "Github rate limit exceeded"
     end
