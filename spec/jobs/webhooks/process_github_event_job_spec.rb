@@ -1,4 +1,5 @@
 require 'rails_helper'
+require "ostruct"
 
 RSpec.describe Webhooks::ProcessGithubEventJob, type: :job do
   describe "#perform" do
@@ -142,6 +143,40 @@ RSpec.describe Webhooks::ProcessGithubEventJob, type: :job do
 
         expect(webhook.received?).to be false
         expect(webhook.processed?).to be true
+      end
+
+      describe "rate limit error is raised" do
+        it "should re-enque the job for 1 second after the limit resets" do
+          allow(github_client).to receive(:rate_limit).and_return(OpenStruct.new(resets_in: 5))
+          allow(github_client).to receive(:refresh_actor_attributes).and_raise(Github::RateLimited)
+
+          expect(Webhooks::ProcessGithubEventJob).to receive(:set).with(wait: 6.seconds).and_return(Webhooks::ProcessGithubEventJob)
+          expect(Webhooks::ProcessGithubEventJob).to receive(:perform_later).with(webhook.id)
+
+          subject.perform(webhook.id)
+        end
+      end
+
+      describe "another exception is raised" do
+        let(:error) { StandardError.new }
+
+        before do
+          allow(github_client).to receive(:refresh_actor_attributes).and_raise(error)
+        end
+
+        it "log the error" do
+          expect(subject.logger).to receive(:error).with("webhooks.github_events.failed", webhook_id: webhook.id, exception: error)
+
+          subject.perform(webhook.id)
+        end
+
+        it "should mark the webhook as failed!" do
+          subject.perform(webhook.id)
+
+          webhook.reload
+
+          expect(webhook.failed?).to be true
+        end
       end
     end
   end

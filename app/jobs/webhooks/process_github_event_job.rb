@@ -3,8 +3,6 @@ class Webhooks::ProcessGithubEventJob < ApplicationJob
 
   queue_as :default
 
-  retry_on Github::RateLimited, wait: :polynomially_longer, attempts: 5
-
   def initialize(*args, github_client: Github::Client.new)
     super(*args)
 
@@ -31,6 +29,14 @@ class Webhooks::ProcessGithubEventJob < ApplicationJob
     mark_webhook_as_processed
 
     logger.info "webhooks.github_events.processed", webhook_id: id, github_event_id: webhook.github_event_id
+  rescue Github::RateLimited
+    # enque for after rate limit resets
+    Webhooks::ProcessGithubEventJob
+      .set(wait: (github_client.rate_limit.resets_in + 1).seconds)
+      .perform_later(id)
+  rescue => e
+    logger.error "webhooks.github_events.failed", webhook_id: id, exception: e
+    webhook.failed!
   end
 
   private
