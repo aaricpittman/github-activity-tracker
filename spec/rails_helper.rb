@@ -1,3 +1,6 @@
+require "capybara/rspec"
+require "vcr"
+
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 require 'spec_helper'
 ENV['RAILS_ENV'] ||= 'test'
@@ -69,4 +72,30 @@ RSpec.configure do |config|
   config.filter_rails_from_backtrace!
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")
+
+  config.include ActiveJob::TestHelper, type: :system
+
+  config.around(:each, active_job_adapter: true) do |example|
+    original_adapter = ActiveJob::Base.queue_adapter
+    ActiveJob::Base.queue_adapter = example.metadata[:active_job_adapter]
+
+    example.run
+  ensure
+    ActiveJob::Base.queue_adapter = original_adapter
+  end
 end
+
+Capybara.server = :puma
+Capybara.server_port = 3001
+
+VCR.configure do |config|
+  config.cassette_library_dir = Rails.root.join "spec", "cassettes"
+  config.hook_into :webmock
+  config.ignore_localhost = true
+  config.configure_rspec_metadata!
+  config.default_cassette_options = { 
+    record: :once,
+    re_record_interval: 30.days
+  }
+end
+

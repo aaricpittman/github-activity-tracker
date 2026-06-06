@@ -2,8 +2,8 @@ module ActivityTracker
   class GithubEventIngest
     include SemanticLogger::Loggable
 
-    def self.run
-      new.run
+    def self.run(...)
+      new.run(...)
     end
 
     def initialize(activity_tracker: ActivityTracker::Client.new, github: Github::Client.new)
@@ -11,11 +11,11 @@ module ActivityTracker
       @github = github
     end
 
-    def run
+    def run(num_events: calculate_page_size)
       logger.info "ingest.github_events.starting"
 
-      logger.info "ingest.github_events.fetching_events", num_of_events: calculate_page_size
-      github.fetch_events(per_page: calculate_page_size).each do |event|
+      logger.info "ingest.github_events.fetching_events", num_of_events: num_events
+      github.fetch_events(per_page: num_events).each do |event|
         logger.info "ingest.github_events.sending_event", github_event_id: event.id
         case (response = activity_tracker.send_github_event(event)).code
         when 200...300 then next
