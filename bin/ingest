@@ -1,1 +1,3 @@
-bin/rails runner script/ingest.rb
+#!/usr/bin/env sh
+
+bin/rails runner script/ingest.rb $1

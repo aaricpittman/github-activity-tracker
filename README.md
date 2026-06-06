@@ -3,7 +3,7 @@
 ## Setup
 
 ```shell
-docker compose run --rm app bin/rails db:prepare
+docker compose run --rm --build app bin/rails db:prepare
 ```
 
 ## Run System

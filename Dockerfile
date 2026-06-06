@@ -27,6 +27,26 @@ ENV RAILS_ENV="production" \
     BUNDLE_WITHOUT="development" \
     LD_PRELOAD="/usr/local/lib/libjemalloc.so"
 
+
+FROM base AS test
+
+# Install packages needed to build gems
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y build-essential chromium chromium-driver git libpq-dev libvips libyaml-dev pkg-config && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+# Install application gems
+COPY vendor/* ./vendor/
+COPY Gemfile Gemfile.lock ./
+
+RUN bundle install
+
+# Entrypoint prepares the database.
+ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+
+CMD ["bundle exec rspec"]
+
+
 # Throw-away build stage to reduce size of final image
 FROM base AS build
 

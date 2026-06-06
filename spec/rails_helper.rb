@@ -1,3 +1,6 @@
+require "capybara/rspec"
+require "vcr"
+
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 require 'spec_helper'
 ENV['RAILS_ENV'] ||= 'test'
@@ -34,6 +37,24 @@ begin
 rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip
 end
+
+Capybara.register_driver :selenium_chrome_headless_container do |app|
+  options = Selenium::WebDriver::Chrome::Options.new
+  options.binary = ENV["CHROME_BIN"] if ENV["CHROME_BIN"].present?
+  options.add_argument("--headless=new")
+  options.add_argument("--no-sandbox")
+  options.add_argument("--disable-dev-shm-usage")
+  options.add_argument("--disable-gpu")
+  options.add_argument("--window-size=1400,1400")
+
+  driver_options = { browser: :chrome, options: options }
+  if ENV["CHROMEDRIVER_PATH"].present?
+    driver_options[:service] = Selenium::WebDriver::Service.chrome(path: ENV["CHROMEDRIVER_PATH"])
+  end
+
+  Capybara::Selenium::Driver.new(app, **driver_options)
+end
+
 RSpec.configure do |config|
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [
@@ -69,4 +90,33 @@ RSpec.configure do |config|
   config.filter_rails_from_backtrace!
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")
+
+  config.include ActiveJob::TestHelper, type: :system
+
+  config.before(:each, type: :system) do
+    driven_by :selenium_chrome_headless_container
+  end
+
+  config.around(:each, active_job_adapter: true) do |example|
+    original_adapter = ActiveJob::Base.queue_adapter
+    ActiveJob::Base.queue_adapter = example.metadata[:active_job_adapter]
+
+    example.run
+  ensure
+    ActiveJob::Base.queue_adapter = original_adapter
+  end
+end
+
+Capybara.server = :puma
+Capybara.server_port = 3001
+
+VCR.configure do |config|
+  config.cassette_library_dir = Rails.root.join "spec", "cassettes"
+  config.hook_into :webmock
+  config.ignore_localhost = true
+  config.configure_rspec_metadata!
+  config.default_cassette_options = { 
+    record: :once,
+    re_record_interval: 30.days
+  }
 end

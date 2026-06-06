@@ -41,7 +41,9 @@ services:
       - .:/rails
 
   test:
-    build: .
+    build:
+      context: .
+      target: test
     command: bundle exec rspec
     depends_on:
       - db
