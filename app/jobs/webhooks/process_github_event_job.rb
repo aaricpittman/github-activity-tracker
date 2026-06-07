@@ -35,7 +35,7 @@ class Webhooks::ProcessGithubEventJob < ApplicationJob
       .set(wait: (github_client.rate_limit.resets_in + 1).seconds)
       .perform_later(id)
   rescue => e
-    logger.error "webhooks.github_events.failed", webhook_id: id, exception: e
+    logger.error "webhooks.github_events.failed", webhook_id: id, github_event_id: webhook.github_event_id, exception: e
     webhook.failed!
   end
 
