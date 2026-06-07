@@ -165,7 +165,7 @@ RSpec.describe Webhooks::ProcessGithubEventJob, type: :job do
         end
 
         it "log the error" do
-          expect(subject.logger).to receive(:error).with("webhooks.github_events.failed", webhook_id: webhook.id, exception: error)
+          expect(subject.logger).to receive(:error).with("webhooks.github_events.failed", github_event_id: webhook.github_event_id, webhook_id: webhook.id, exception: error)
 
           subject.perform(webhook.id)
         end

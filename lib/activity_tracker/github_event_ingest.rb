@@ -20,7 +20,7 @@ module ActivityTracker
         case (response = activity_tracker.send_github_event(event)).code
         when 200...300 then next
         else
-          logger.error "ingest.github_events.send_failed", event: event.to_h, response_code: response.code
+          logger.error "ingest.github_events.send_failed", github_event_id: event.id, event: event.to_h, response_code: response.code
         end
       end
 
